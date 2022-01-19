@@ -1,23 +1,28 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react'
+import { ActionCableConsumer } from 'react-actioncable-provider'
 
 function App() {
+  const [rooms, setRooms] = useState([])
+
+  useEffect(() => {
+    fetch('http://localhost:3000/rooms')
+    .then(r => r.json())
+    .then(setRooms)
+  }, [])
+
+  function handleReceivedRoom(response) {
+    console.log(response)
+    const { room } = response
+    setRooms(rooms => [...rooms, room])
+  }
+  console.log(rooms)
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <ActionCableConsumer 
+        channel={{ channel: 'RoomsChannel' }}
+        onReceived={handleReceivedRoom}
+      />
     </div>
   );
 }
